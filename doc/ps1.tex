@@ -1,0 +1,86 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=.75in]{geometry}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{amssymb} \usepackage{natbib}
+\usepackage{float} \usepackage{appendix}
+\usepackage{hyperref}
+\usepackage{mathrsfs}
+\floatstyle{ruled} \restylefloat{table} \restylefloat{figure}
+\bibliographystyle{unsrtnat}
+
+\newcommand{\floatintro}[1]{
+  
+  \vspace*{0.1in}
+  
+  {\footnotesize
+
+    #1
+    
+  }
+  
+  \vspace*{0.1in} }
+\newcommand{\Hline}{\noindent\rule{17cm}{0.5pt}} \title{Homework 1:
+  Labor Economics} \author{Dhananjay Ghei} \date{December 3, 2018}
+\begin{document}
+\maketitle
+\section{Preliminary analysis}
+\begin{enumerate}
+\item Visit the BHPS website and familiarise yourself with the basic
+  structure and contents of the BHPS data. What features make it a
+  suitable data set for the estimation of the BM model? \\ \Hline \\
+\item Open the file and answer the following questions:
+  \begin{enumerate}
+  \item What is the sample size? What is the sex ratio in the sample?
+  \item What is the sample unemployment rate? What is the sample
+    unemployment rate of men? Of women? Or workers in each education
+    category? 
+  \item What proportion of initial spells are right-censored? Answer
+    the same question for each type of first spell (job or
+    unemployment spell).
+  \end{enumerate}
+\Hline \\
+\item Construct the initial (spell-1) cross-sectional CDF (\texttt{G})
+  and density of log wages \texttt{logw1}. Produce the plots of these
+  two objects.\\ \Hline \\
+\item Create a variable categorising \texttt{logw1} into 25 bins (ie,
+  percentiles 1-4, 5-8,9-12,\dots,97-100) and a variable containing
+  the mean spell-1 duration (\texttt{spelldur1}) within each of these
+  25 bins. Plot those mean durations against the wage percentiles. Is
+  this consistent with the BM model?\\ \Hline \\
+\item Explain how one can obtain a non-parametric estimate of the wage
+  sampling distribution $F$ from the data. Construct this
+  non-parametric estimate, and plot it on the same graph as
+  \texttt{G}. Is this consistent with the theory? What else can you
+  say about the estimate of $F$? \\ \Hline \\
+\end{enumerate}
+\section{Estimation}
+\begin{enumerate}
+\item Write code for the MLE estimation of the BM model following the
+  two-step protocol of Bontemps, Robin and Van den Berg (1999). \\ \Hline \\
+\item Write code for computing the standard errors of the estimates
+  $\delta$, $\lambda_0$ and $\lambda_1$, explaining the assumptions
+  upon which those standard errors rely. \\ \Hline \\
+\item The file \texttt{BM\_data\_simulated.csv} contains artificial data
+  resulting from a simulation of 5,000 workers behaving according to
+  the BM model with parameters $\delta=0.01$, $\lambda_0=0.1$,
+  $\lambda_1=0.05$ (monthly values). Run your ML estimation routine on
+  the simulated data, and check that your estimates against the true
+  parameter values. \\ \Hline \\
+\end{enumerate}
+\section{Playing around with the model}
+\begin{enumerate}
+\item What is the predicted unemployment rate from the estimates
+  obtained in Section II? Compare it with the sample unemployment
+  rate, and discuss the possible reasons for any discrepancy. \\ \Hline \\
+\item Construct kernel density estimates of the cross-section
+  distribution of wages $g(w)$ and of the sampling distribution
+  $f(w)$. Plot both densities on the same graph. \\ \Hline \\
+\item Construct the distribution of firm productivity that
+  rationalises the observed wage distribution within the BM
+  model. Plot firm productivity against wages, and against the
+  cross-section CDF of wages $G(w)$. Do you notice anything wrong? \\ \Hline \\
+\item Looking at the predicted profit rate of high-productivity firms,
+  what else can you say about the BM model? \\ \Hline \\
+\end{enumerate}
+\end{document}
