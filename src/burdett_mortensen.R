@@ -103,6 +103,7 @@ kappa_1 <- kappa_1[is.finite(kappa_1)]
 
 # Starting the MLE estimation
 # Writing the CDF as a function of kappa_1
+# Page 327 (Bontemps, Robin, Van Den Berg - IER (2000))
 F <- function(w, theta){
     lambda0 <- theta[1]
     lambda1 <- theta[2]
@@ -111,6 +112,16 @@ F <- function(w, theta){
     F <- (1+kappa)*Gcdf(w)/(1+kappa*Gcdf(w))
     return(F)
 }
+# Writing the PDF of F as a function of kappa_1
+# Page 328 (Bontemps, Robin, Van Den Berg - IER (2000))
+f <- function(w, theta){
+    lambda0 <- theta[1]
+    lambda1 <- theta[2]
+    delta <- theta[3]
+    kappa <- lambda1/delta
+    f <- (1+kappa)*Gdensity(w)/((1+kappa*Gcdf(w))^2)
+    return(f)
+}
 
 # Likelihood for unemployed people
 L0 <- function(theta, cu, du, xu){
@@ -118,9 +129,8 @@ L0 <- function(theta, cu, du, xu){
     lambda1 <- theta[2]                 
     delta <- theta[3]
     scale <- lambda0/(lambda0+delta)
-#    f <- gradient(F, x=xu, theta=theta, pert=1e-3)
     dens_spell_dur <- (1-cu)*log(lambda0 * exp(-lambda0*du))
-    dens_accept_job <- (1-cu)*log(F(xu, theta))
+    dens_accept_job <- (1-cu)*log(f(xu, theta))
     logLL_unemp <- scale*sum(dens_spell_dur+dens_accept_job, na.rm=TRUE)
     return(-logLL_unemp)
 }
@@ -166,7 +176,7 @@ LLfull <- function(theta, cu, du, xu, ce, de, j2j, j2u, xe){
     return(full_logLL)
 }
 
-mle.dat <- optim(par=c(1,2,3), fn=LLfull, cu=cu, du=du, xu=xu,
+mle.dat <- optim(par=c(.1,.2,.3), fn=LLfull, cu=cu, du=du, xu=xu,
       ce=ce, de=de, j2j=j2j, j2u=j2u, xe=xe, method="L-BFGS-B",
       lower=c(rep(0.01,3)), upper=1, hessian=TRUE)
 
@@ -176,7 +186,3 @@ se.estimates <- sqrt(diag(mle.dat$hessian^(-1)))
 
 # Simulated data
 sim.dat <- read.csv("../data/bm_data_simulated.csv")
-
-
-
-
