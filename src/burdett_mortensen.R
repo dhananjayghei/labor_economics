@@ -151,7 +151,7 @@ L1 <- function(theta, ce, de, j2j, j2u, xe){
     dens_spell_dur <- (1-ce)*log(delta+lambda1*(1-F(xe, theta)))-
         (delta+lambda1*(1-F(xe, theta)))*de
     # Conditional probability of cause of job spell termination
-    prob_job_trans <- is.finite(j2u*log(delta/(delta+lambda1*(1-F(xe, theta)))))+ is.finite(j2j*log((lambda1*(1-F(xe, theta)))/(delta+ lambda1*(1-F(xe, theta))))) 
+    prob_job_trans <- j2u*log(delta/(delta+lambda1*(1-F(xe, theta))))+ j2j*log((lambda1*(1-F(xe, theta)))/(delta+ lambda1*(1-F(xe, theta)))) 
     logLL_emp <- scale*sum(dens_job_val+dens_spell_dur+prob_job_trans,
                      na.rm=TRUE)
     return(-logLL_emp)
