@@ -92,8 +92,7 @@ is a non-parametric estimator of the density function.
   increasing trend along the wage percentiles. Therefore, one would
   posit that as wages increase, the duration in the job also increases
   as it takes more time for firms to compensate the worker with the
-  same wage offer as their current ones. Table \ref{tab:duration} in
-  Appendix A gives the data used for generating the plot below.
+  same wage offer as their current ones.
   \begin{figure}[htbp!]
     \floatintro{The figure shows the mean durations against the wage
       percentiles. The solid line shows the actual mean wage duration
@@ -141,20 +140,25 @@ is a non-parametric estimator of the density function.
     \caption{Kernel density estimate of PDF ($\hat f$ and $\hat g$)}
     \label{fig:Gdens}
   \end{figure}
-As explained in the lecture slides, the model is over-identified and
-hence, we can also estimate $\kappa_1$ from the estimates of $F$ and
-$G$ using the equation given above. I use the equation and estimate
-the average $\kappa_1$ across the quantiles of $G$. Figure
-\ref{fig:kappa} shows the estimated $\kappa_1$ across these
-quantiles. The mean of the estimate equals 2.76. The
-estimate should be roughly constant across the quantiles of $\hat
-G$. As we will see in the later part, the estimated $\kappa_1$ from
-MLE will be 1.35 (roughly half of this non-parametric estimate).
+  As explained in the lecture slides, the model is over-identified and
+  hence, we can also estimate $\kappa_1$ from the estimates of $F$ and
+  $G$ using the equation:
+  \begin{align*}
+    \kappa_1^{np} = \frac{\hat F(w) - \hat G(w)}{(1-\hat F(w)) \hat G(w)}
+  \end{align*}
+  I use this equation and estimate
+  the average $\kappa_1$ across the quantiles of $G$. Figure
+  \ref{fig:kappa} shows the estimated $\kappa_1$ across these
+  quantiles. The mean of the estimate equals 2.76. The estimate should
+  be roughly constant across the quantiles of $\hat G$. As we will see
+  in the later part, the estimated $\kappa_1$ from MLE will be 1.35
+  (roughly half of this non-parametric estimate).
 
   \begin{figure}[htbp!]
     \floatintro{The figure shows the non-parametric estimate of
       $\kappa_1$ across the quantiles of $\hat G$. The estimate is
-      calculated using the empirical CDF of $\hat F$ and $\hat G$. }  \centering
+      calculated using the empirical CDF of $\hat F$ and $\hat G$. }
+    \centering
     \includegraphics[scale=.6]{./pics/kappa1_np.pdf}
     \caption{Non-parametric estimate of $\kappa_1$ using $\hat F$ and
       $\hat G$}
@@ -167,8 +171,8 @@ MLE will be 1.35 (roughly half of this non-parametric estimate).
 \item Write code for the MLE estimation of the BM model following the
   two-step protocol of Bontemps, Robin and Van den Berg (1999). \\
   \Hline \\
-  I follow the two-step protocol as laid out in Bontemps, Robin and
-  Van den Berg (2000)\footnote{I think the paper you wanted to refer
+  I follow the two-step protocol as laid out in
+  \citep{bontemps2000}\footnote{I think the paper you wanted to refer
     to was the 2000 one and not the 1999 one. The lecture slides say
     that it is the 2000 one.}. Given our estimates of $\hat G$ and
   $\hat g$, I write functions $\hat F(:,\kappa_1)$ and
@@ -180,7 +184,6 @@ MLE will be 1.35 (roughly half of this non-parametric estimate).
     \qquad \text{and} \qquad
     \hat f(w) = \frac{(1+\kappa_1) \hat g(w)}{[1+\kappa_1 \hat G(w)]^2}
   \end{align*}
-
   Next, I write the likelihood function for the employed and
   unemployed using the expressions below:
   \begin{align*}
@@ -208,6 +211,28 @@ MLE will be 1.35 (roughly half of this non-parametric estimate).
 \item Write code for computing the standard errors of the estimates
   $\delta$, $\lambda_0$ and $\lambda_1$, explaining the assumptions
   upon which those standard errors rely. \\ \Hline \\
+  I compute the standard errors using two methods.\\
+  The first method is by inverting the Hessian matrix\footnote{This is
+    the Hessian matrix for the negative of log likelihood evaluated at
+    the optimum.} and calculating the square root of the diagonal
+  elements. This gives the asymptotic standard errors.
+
+  The second method is to compute it using bootstrap. Bootstrap is
+  done in \texttt{R} using the \texttt{bootstrap} package. 
+
+  Table shows a comparison of standard errors computed using these two
+  methods. 
+\begin{figure}
+  \floatintro{The figure shows a comparison of estimated $\hat F$ from
+    direct estimation versus ML estimation. The solid black line shows
+    the predicted $\hat F$ from the ML estimation and the solid gray
+    line shows the estimated $\hat F$ from the sample of new hires who
+    moved from unemployment to employment.}  \centering
+  \includegraphics[scale=.6]{./pics/estF_data.pdf}
+  \caption{Comparison of estimated $\hat F$ from direct estimation vs
+    ML estimation}
+  \label{fig:estF}
+\end{figure}
 \item The file \texttt{BM\_data\_simulated.csv} contains artificial
   data resulting from a simulation of 5,000 workers behaving according
   to the BM model with parameters $\delta=0.01$, $\lambda_0=0.1$,
@@ -241,55 +266,90 @@ MLE will be 1.35 (roughly half of this non-parametric estimate).
     Pr\{e_i=0\} = 1-Pr\{e_i=1\} = \text{Unemp. rate} =
     \frac{\delta}{\delta+\lambda_0}
   \end{align*}
-For BHPS data, the sample unemployment rate is 5.92\% whereas the
-predicted unemployment rate from the MLE estimation of parameters is
-6.26\%. For simulated data, the sample unemployment rate is 9.58\% whereas
-the predicted unemployment rate from the MLE estimation is 9.09\%.
+  For BHPS data, the sample unemployment rate is 5.92\% whereas the
+  predicted unemployment rate from the MLE estimation of parameters is
+  6.26\%. For simulated data, the sample unemployment rate is 9.58\%
+  whereas the predicted unemployment rate from the MLE estimation is
+  9.09\%.
 \item Construct kernel density estimates of the cross-section
   distribution of wages $g(w)$ and of the sampling distribution
   $f(w)$. Plot both densities on the same graph. \\ \Hline \\
-Figure \ref{fig:Gdens} shows the kernel density estimates for the BHPS
-data. These kernel density estimates are from the sample itself and
-not from the predictions of our estimation routine. 
+  Figure \ref{fig:Gdens} shows the kernel density estimates for the
+  BHPS data. These kernel density estimates are from the sample itself
+  and not from the predictions of our estimation routine.
 
-Figure \ref{fig:Gdens_sim} shows the kernel density estimates of $\hat
-g$ and $\hat f$ from the sample of simulated data. Once again, these
-estimates are from the sample itself and not from the predictions of
-our estimation results.
-\begin{figure}[htbp!]
-  \floatintro{The figure shows the empirical pdf of $f$ and $g$
-    estimated from the simulated data. The
-    solid gray line shows the kernel density estimate of $\hat f$
-    and the solid black line shows the kernel density estimate of
-    $\hat g$.}  \centering
-  \includegraphics[scale=.6]{./pics/FG_density_sim.pdf}
-  \caption{Kernel density estimate of PDF ($\hat f$ and $\hat g$)}
-  \label{fig:Gdens_sim}
-\end{figure}
+  Figure \ref{fig:Gdens_sim} shows the kernel density estimates of
+  $\hat g$ and $\hat f$ from the sample of simulated data. Once again,
+  these estimates are from the sample itself and not from the
+  predictions of our estimation results.
+  \begin{figure}[htbp!]
+    \floatintro{The figure shows the empirical pdf of $f$ and $g$
+      estimated from the simulated data. The solid gray line shows the
+      kernel density estimate of $\hat f$ and the solid black line
+      shows the kernel density estimate of $\hat g$.}  \centering
+    \includegraphics[scale=.6]{./pics/FG_density_sim.pdf}
+    \caption{Kernel density estimate of PDF ($\hat f$ and $\hat g$)}
+    \label{fig:Gdens_sim}
+  \end{figure}
 
 \item Construct the distribution of firm productivity that
   rationalises the observed wage distribution within the BM
   model. Plot firm productivity against wages, and against the
   cross-section CDF of wages $G(w)$. Do you notice anything wrong? \\
   \Hline \\
-The firm productivity is given by:
-\begin{align*}
-  p = w + \frac{1+\kappa_1 \hat G(w)}{2 \kappa_1 g(w)}
-\end{align*}
-Using the above expression, I calculate the firm productivity. 
+  The firm productivity is given by:
+  \begin{align*}
+    p = w + \frac{1+\kappa_1 \hat G(w)}{2 \kappa_1 g(w)}
+  \end{align*}
+  Using the above expression, I calculate the firm productivity and
+  plot the (QQ - plots) log wages against log productivity. Figure
+  \ref{fig:qqplot_prod} shows the QQ plot for log wage versus log
+  productivity. For low productivity firms, the wage is increasing as
+  a function of productivity, whereas the curve smooths out as we move
+  towards the higher productivity firms. In particular, the vertical
+  dotted lines show the 5th, 25th, 50th and 75th percentiles of log
+  productivity. One can see that the wages are increasing over these
+  percentiles but tend to smoothen out beyond the 75th percentile.
+
+\begin{figure}[htbp!]
+  \floatintro{The figure shows the quantile-quantile plot of log wage
+    versus log productivity on the BHPS data set. The vertical lines
+    represent the 5th, 25th, 50th and 75th percentile of log
+    productivity.}  \centering
+  \includegraphics[scale=.6]{./pics/prod_wages.pdf}
+  \caption{QQ plot for log wage versus log productivity}
+  \label{fig:qqplot_prod}
+\end{figure}
+
 \item Looking at the predicted profit rate of high-productivity firms,
   what else can you say about the BM model? \\ \Hline \\
-The profit rate is simply the surplus above the wage and is given by
-$\frac{(p-w)}{p}$.
+  The profit rate is simply the surplus above the wage and is given by
+  $\frac{(p-w)}{p}$. Figure \ref{fig:qqplot_profit} shows the QQ plot
+  for profit rate versus log productivity. Since, wages are strictly
+  increasing in the initial quantiles, the profits are roughly
+  constant till the 25th percentile and take off beyond that. Higher
+  productivity firms have steady wages and therefore, higher profit
+  rates.
+
+\begin{figure}
+  \floatintro{The figure shows the quantile-quantile plot of profit
+    rate versus log productivity on the BHPS data set. The vertical
+    lines represent the 5th, 25th, 50th and 75th percentile of log
+    productivity.}  \centering
+  \includegraphics[scale=.6]{./pics/prod_profit.pdf}
+  \caption{QQ plot for profit rate versus log productivity}
+  \label{fig:qqplot_profit}
+\end{figure}
 \end{enumerate}
-\newpage
-\begin{appendix}
-\section{Mean duration across wage percentiles}
-\begin{table}[htbp!]
-  \centering
-  \input{./tables/duration_wages_float.gen}
-  \caption{Variation in mean duration across wage percentiles}
-  \label{tab:duration}
-\end{table}
-\end{appendix}
+% \newpage
+% \begin{appendix}
+% \section{Mean duration across wage percentiles}
+% \begin{table}[htbp!]
+%   \centering
+%   \input{./tables/duration_wages_float.gen}
+%   \caption{Variation in mean duration across wage percentiles}
+%   \label{tab:duration}
+% \end{table}
+% \end{appendix}
+\bibliography{labor}
 \end{document}
