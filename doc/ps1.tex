@@ -24,6 +24,8 @@
   Labor Economics} \author{Dhananjay Ghei} \date{December 3, 2018}
 \begin{document}
 \maketitle
+\textit{Note: The code for this exercise is written in \texttt{R}. The code is
+available at} \url{www.github.com/dhananjayghei/labor_economics}
 \section{Preliminary analysis}
 \begin{enumerate}
 \item Visit the BHPS website and familiarise yourself with the basic
@@ -216,7 +218,10 @@ MLE will be 1.35 (roughly half of this non-parametric estimate).
   unemployed who were hired. But, from the lecture slides, one can see
   that if wage is unobserved, we can integrate out the wages from the
   likelihood expression and re-write it as:
-
+  \begin{align*}
+    \int_{y}^{\bar{y}} L(x_i|e_i=0) dy_{0i} =
+    \lambda_0^{1-c_i} \exp(-\lambda_0 d_i)
+  \end{align*}
   I use this fact and then run the ML estimation routine as before on
   the simulated data set. My parameter estimates are
   $\lambda_0=0.09986$, $\lambda_1=0.05385$ and $\delta=0.00999$. These
@@ -265,9 +270,17 @@ our estimation results.
 \item Construct the distribution of firm productivity that
   rationalises the observed wage distribution within the BM
   model. Plot firm productivity against wages, and against the
-  cross-section CDF of wages $G(w)$. Do you notice anything wrong? \\ \Hline \\
+  cross-section CDF of wages $G(w)$. Do you notice anything wrong? \\
+  \Hline \\
+The firm productivity is given by:
+\begin{align*}
+  p = w + \frac{1+\kappa_1 \hat G(w)}{2 \kappa_1 g(w)}
+\end{align*}
+Using the above expression, I calculate the firm productivity. 
 \item Looking at the predicted profit rate of high-productivity firms,
   what else can you say about the BM model? \\ \Hline \\
+The profit rate is simply the surplus above the wage and is given by
+$\frac{(p-w)}{p}$.
 \end{enumerate}
 \newpage
 \begin{appendix}
