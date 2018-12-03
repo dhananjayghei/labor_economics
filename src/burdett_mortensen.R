@@ -178,7 +178,42 @@ legend("topleft", legend=c("Predicted F (using MLE)", "Empirical F"),
        lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"), bty="n")
 dev.off()
 
-# Simulated data
+
+# Construct the distribution of firm productivity
+datPlot <- bhps[, c("e1", "spelldur1", "logw1", "right_censor", "G")]
+productivity <- function(w, kappa){
+    p <- w + ((1+kappa*Gcdf(w))/(2*kappa*Gdensity(w))) # Productivity
+    profit <- (p-w)/p # Monopsony power/ Profit rate/ Profit share
+    return(data.frame(prod=p, profit=profit))
+}
+
+firm.prod <- data.frame(do.call(rbind, lapply(dat$logw1, function(x) productivity(x, kappa1_sim))))
+colnames(firm.prod) <- c("firm_prod", "firm_profit_rate")
+dat$firm_prod <- firm.prod$firm_prod
+dat$firm_profit_rate <- firm.prod$firm_profit_rate
+
+datPlot <- dat[complete.cases(dat$logw1, dat$firm_prod), ]
+
+pdf(file="../doc/pics/prod_wages.pdf", width=5.4, height=3.8)
+par(mai=c(.8,.8,.3,.2))
+qqplot(y=datPlot$logw1, x=datPlot$firm_prod, type="l", main="", xlab="Log(productivity)", ylab="Log(wages)",
+       lwd=2)
+lapply(prod_percentiles, function(x){
+    abline(v=x, lty=2)
+})
+dev.off()
+
+prod_percentiles <- quantile(datPlot$firm_prod, probs=c(.05, .25, .5, .75))
+pdf(file="../doc/pics/prod_profit.pdf", width=5.4, height=3.8)
+par(mai=c(.8,.8,.3,.2))
+qqplot(x=datPlot$firm_prod, y=datPlot$firm_profit_rate, main="", xlab="Log(productivity)",
+       ylab="Profit rate", type="l", lwd=2)
+lapply(prod_percentiles, function(x){
+    abline(v=x, lty=2)
+})
+dev.off()
+
+# ---------------------------------- Simulated data
 sim.dat <- read.csv("../data/bm_data_simulated.csv")
 colnames(sim.dat)[1] <- "e1"
 
@@ -252,16 +287,5 @@ sim.dat$firm.prod <- firm.prod$firm_prod
 
 sim.datPlot <- sim.dat[complete.cases(sim.dat$logw1, sim.dat$firm.prod), ]
 
-plot(x=sim.datPlot$logw1, y=sim.datPlot$firm.prod, main="", xlab="Log(wages)", ylab="Log(productivity)")
+qqplot(y=sim.datPlot$logw1, x=sim.datPlot$firm.prod, type="l")#, main="", xlab="Log(wages)", ylab="Log(productivity)")
 
-# Construct the distribution of predicted profit rate
-profit <- function(w, kappa){
-    profit <- (productivity(w, kappa) - w)/productivity(w, kappa)
-    return(profit)
-}
-
-profit.rate <- data.frame(do.call(rbind, lapply(sim.dat$logw1, function(x) productivity(x, kappa1_sim))))
-colnames(profit.rate) <- "profit_rate"
-sim.dat$profit.rate <- profit.rate$profit_rate
-
-plot(x=sim.dat$logw1, y=sim.dat$profit.rate, main="", xlab="Log(wages)", ylab="Profit rate")
