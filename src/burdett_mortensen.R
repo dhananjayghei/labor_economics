@@ -29,6 +29,7 @@ unemp_sex <- bhps %>%
               unemp_rate = round(unemp*100/total, 3)) %>% data.frame()
 unemp_sex$sex <- c("Female", "Male")
 colnames(unemp_sex) <- c("Sex", "Unemployed", "Total", "Unemployment Rate")
+genxtable(xtable(unemp_sex, align="llrrr", digits=c(rep(0,4),2)), basename="unemp_sex", include.rownames=FALSE)
 # Sample unemployment rate by education
 unemp_educ <- bhps %>%
     group_by(educ) %>%
@@ -37,7 +38,7 @@ unemp_educ <- bhps %>%
               unemp_rate = round(unemp*100/nrow(.),3)) %>% data.frame()
 unemp_educ$educ <- c("less than A-levels", "A-levels", "Some Higher Education")
 colnames(unemp_educ) <- c("Education", "Unemployed", "Total", "Unemployment Rate")
-
+genxtable(xtable(unemp_educ, align="llrrr", digits=c(rep(0,4),2)), basename="unemp_educ", include.rownames=FALSE)
 # Proportion of people with right censoring
 # For initially employed people (e1=1)
 Rcens_emp <- bhps %>%
@@ -89,7 +90,7 @@ dev.off()
 
 names(dur_wages) <- c("Wage (Bins)", "Quartiles", "Avg. Spell Duration")
 dur_wages <- dur_wages[, -1]
-genxtable(xtable(dur_wages, align="lrr"), basename="duration_wages", include.rownames=FALSE)
+genxtable(xtable(dur_wages, align="lrr", digits=c(0,0,3)), basename="duration_wages", include.rownames=FALSE)
 
 # Construct the CDF F (Fcdf is also a function)
 Fcdf <- ecdf(bhps[which(bhps$e1==0 & bhps$u2j==1), "logw2"])
@@ -103,7 +104,8 @@ pdf(file="../doc/pics/FG_data.pdf", width=5.4, height=3.8)
 par(mai=c(.8,.8,.3,.2))
 plot(Gcdf, main="", xlab="Log(wages)", ylab="Cumulative Distribution Function", col="black")
 plot.stepfun(Fcdf, do.points=FALSE, add=TRUE, col="gray45")
-legend("topleft", legend=c("G(w)", "F(w)"), lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"),
+legend("topleft", legend=c("Empirical G", "Empirical F"),
+       lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"),
        bty="n")
 dev.off()
 
@@ -112,10 +114,9 @@ pdf(file="../doc/pics/FG_density.pdf", width=5.4, height=3.8)
 par(mai=c(.8,.8,.3,.2))
 plot(Gdens, main="", xlab="Log(wages)", ylab="Density", col="black", xlim=c(min(Fdens$x), max(Fdens$x)))
 lines(Fdens, col="gray45")
-legend("topleft", legend=c("G(w)", "F(w)"), lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"),
+legend("topleft", legend=c("Empirical g", "Empirical f"), lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"),
        bty="n")
 dev.off()
-
 
 # Estimating kappa_1 non-parametrically
 kappa1 <- function(x){
@@ -123,12 +124,32 @@ kappa1 <- function(x){
     return(kappa1)
 }
 
+# Adding the Gcdf function
+bhps$G <- Gcdf(bhps$logw1)
+bhps$G_qtls <- cut(bhps$G, quantile(bhps$G, probs=seq(0,1,1/25), na.rm=TRUE))
+
+G_qtls <- as.numeric(unlist(strsplit(unlist(strsplit(names(table(bhps$G_qtls)), split="[,]"))[seq(2,50,by=2)], split="]")))
+
+# Split by quartiles of G
+bhpsG <- split(bhps, bhps$G_qtls)
+kappa1_np <- do.call(rbind, lapply(bhpsG, function(x){
+    k <- kappa1(x$logw1)
+    avgK <- mean(k, na.rm=TRUE)
+    return(avgK)
+}))
+kappa1_np <- data.frame(kappa1_np)
+kappa1_np$G_qtls <- G_qtls
+kappa1_np <- kappa1_np[is.finite(kappa1_np$kappa1_np), ]
+
+pdf(file="../doc/pics/kappa1_np.pdf", width=5.4, height=3.8)
+par(mai=c(.8,.8,.3,.2))
+plot(kappa1_np[, 2], kappa1_np[,1], type="l", main="", xlab="G", ylab=expression(kappa[1]), xlim=c(0,1))
+abline(h=mean(kappa1_np[,1]), lty=2)
+dev.off()
+
 wages1 <- unique(bhps$logw1)
 kappa_1 <- do.call(rbind, lapply(wages1, kappa1))
 kappa_1 <- kappa_1[is.finite(kappa_1)]
-
-plot(kappa_1, type="l")
-
 
 # Starting the MLE estimation
 # Storing the data set for MLE
@@ -153,7 +174,7 @@ par(mai=c(.8,.8,.3,.2))
 plot(sort(dat$logw1), sort(F(dat$logw1, theta=mle.dat$par)), type="l",
      main="", xlab="Log(wages)", ylab="Cumulative Distribution Function", col="black")
 plot.stepfun(Fcdf, add=TRUE, do.points=FALSE, col="gray45")
-legend("topleft", legend=c("Empirical F", "Predicted F (using MLE)"),
+legend("topleft", legend=c("Predicted F (using MLE)", "Empirical F"),
        lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"), bty="n")
 dev.off()
 
@@ -215,7 +236,7 @@ pdf(file="../doc/pics/FG_density_sim.pdf", width=5.4, height=3.8)
 par(mai=c(.8,.8,.3,.2))
 plot(Gdens, main="", xlab="Log(wages)", ylab="Density", col="black", xlim=c(min(Fdens$x), max(Gdens$x)))
 lines(Fdens, col="gray45")
-legend("topleft", legend=c("G(w)", "F(w)"), lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"),
+legend("topleft", legend=c("Empirical g", "Empirical f"), lty=rep(1,2), lwd=rep(1,2), col=c("black", "gray45"),
        bty="n")
 dev.off()
 
@@ -235,7 +256,7 @@ plot(x=sim.datPlot$logw1, y=sim.datPlot$firm.prod, main="", xlab="Log(wages)", y
 
 # Construct the distribution of predicted profit rate
 profit <- function(w, kappa){
-    profit <- (productivity(w, kappa) - exp(w))/productivity(w, kappa)
+    profit <- (productivity(w, kappa) - w)/productivity(w, kappa)
     return(profit)
 }
 
