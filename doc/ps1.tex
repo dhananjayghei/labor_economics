@@ -29,6 +29,11 @@
 \item Visit the BHPS website and familiarise yourself with the basic
   structure and contents of the BHPS data. What features make it a
   suitable data set for the estimation of the BM model? \\ \Hline \\
+The BHPS data is suitable as it provides us with spells from initial
+duration for both employed and unemployed workers. This helps us in
+estimating the sample distribution of wage offers for both employed
+and unemployed workers as well as the parameters of interest
+(separation rate, job offer arrival rate for employed and unemployed workers).
 \item Open the file and answer the following questions:
   \begin{enumerate}
   \item What is the sample size? What is the sex ratio in the sample?
@@ -134,6 +139,26 @@ is a non-parametric estimator of the density function.
     \caption{Kernel density estimate of PDF ($\hat f$ and $\hat g$)}
     \label{fig:Gdens}
   \end{figure}
+As explained in the lecture slides, the model is over-identified and
+hence, we can also estimate $\kappa_1$ from the estimates of $F$ and
+$G$ using the equation given above. I use the equation and estimate
+the average $\kappa_1$ across the quantiles of $G$. Figure
+\ref{fig:kappa} shows the estimated $\kappa_1$ across these
+quantiles. The mean of the estimate equals 2.76. The
+estimate should be roughly constant across the quantiles of $\hat
+G$. As we will see in the later part, the estimated $\kappa_1$ from
+MLE will be 1.35 (roughly half of this non-parametric estimate).
+
+  \begin{figure}[htbp!]
+    \floatintro{The figure shows the non-parametric estimate of
+      $\kappa_1$ across the quantiles of $\hat G$. The estimate is
+      calculated using the empirical CDF of $\hat F$ and $\hat G$. }  \centering
+    \includegraphics[scale=.6]{./pics/kappa1_np.pdf}
+    \caption{Non-parametric estimate of $\kappa_1$ using $\hat F$ and
+      $\hat G$}
+    \label{fig:kappa}
+  \end{figure}
+ 
 \end{enumerate}
 \section{Estimation}
 \begin{enumerate}
@@ -221,6 +246,22 @@ the predicted unemployment rate from the MLE estimation is 9.09\%.
 Figure \ref{fig:Gdens} shows the kernel density estimates for the BHPS
 data. These kernel density estimates are from the sample itself and
 not from the predictions of our estimation routine. 
+
+Figure \ref{fig:Gdens_sim} shows the kernel density estimates of $\hat
+g$ and $\hat f$ from the sample of simulated data. Once again, these
+estimates are from the sample itself and not from the predictions of
+our estimation results.
+\begin{figure}[htbp!]
+  \floatintro{The figure shows the empirical pdf of $f$ and $g$
+    estimated from the simulated data. The
+    solid gray line shows the kernel density estimate of $\hat f$
+    and the solid black line shows the kernel density estimate of
+    $\hat g$.}  \centering
+  \includegraphics[scale=.6]{./pics/FG_density_sim.pdf}
+  \caption{Kernel density estimate of PDF ($\hat f$ and $\hat g$)}
+  \label{fig:Gdens_sim}
+\end{figure}
+
 \item Construct the distribution of firm productivity that
   rationalises the observed wage distribution within the BM
   model. Plot firm productivity against wages, and against the
