@@ -31,17 +31,18 @@ available at} \url{www.github.com/dhananjayghei/labor_economics}
 \item Visit the BHPS website and familiarise yourself with the basic
   structure and contents of the BHPS data. What features make it a
   suitable data set for the estimation of the BM model? \\ \Hline \\
-The BHPS data is suitable as it provides us with spells from initial
-duration for both employed and unemployed workers. This helps us in
-estimating the sample distribution of wage offers for both employed
-and unemployed workers as well as the parameters of interest
-(separation rate, job offer arrival rate for employed and unemployed workers).
+  The BHPS data is suitable as it provides us with spells from initial
+  duration for both employed and unemployed workers. This helps us in
+  estimating the sample distribution of wage offers for both employed
+  and unemployed workers which is used to estimate the parameters of
+  interest (separation rate, job offer arrival rate for employed and
+  unemployed workers).
 \item Open the file and answer the following questions:
   \begin{enumerate}
   \item What is the sample size? What is the sex ratio in the sample?
   \item What is the sample unemployment rate? What is the sample
     unemployment rate of men? Of women? Or workers in each education
-    category? 
+    category?
   \item What proportion of initial spells are right-censored? Answer
     the same question for each type of first spell (job or
     unemployment spell).
@@ -66,7 +67,7 @@ and unemployed workers as well as the parameters of interest
 
 \begin{table}[htbp!]
   \floatintro{The table shows the unemployment rate in the BHPS sample
-  on the basis of education.}
+    on the basis of education.}
   \centering
   \input{./tables/unemp_educ_float.gen}
   \caption{Unemployment rate (by education)}
@@ -76,11 +77,11 @@ and unemployed workers as well as the parameters of interest
 \item Construct the initial (spell-1) cross-sectional CDF (\texttt{G})
   and density of log wages \texttt{logw1}. Produce the plots of these
   two objects.\\ \Hline \\
-Figure \ref{fig:Fhat} shows the empirical CDF of $G$ estimated using
-the data on log wages of workers who were employed in the initial
-spell. Figure \ref{fig:Gdens} shows the kernel density estimates of
-$g$ and $f$ using the same data as above. The kernel density estimate
-is a non-parametric estimator of the density function.
+  Figure \ref{fig:Fhat} shows the empirical CDF of $G$ estimated using
+  the data on log wages of workers who were employed in the initial
+  spell. Figure \ref{fig:Gdens} shows the kernel density estimates
+  ($g$ and $f$) using the same data as above. The kernel density
+  estimate is a non-parametric estimator of the density function.
 
 \item Create a variable categorising \texttt{logw1} into 25 bins (ie,
   percentiles 1-4, 5-8,9-12,\dots,97-100) and a variable containing
@@ -146,13 +147,13 @@ is a non-parametric estimator of the density function.
   \begin{align*}
     \kappa_1^{np} = \frac{\hat F(w) - \hat G(w)}{(1-\hat F(w)) \hat G(w)}
   \end{align*}
-  I use this equation and estimate
-  the average $\kappa_1$ across the quantiles of $G$. Figure
-  \ref{fig:kappa} shows the estimated $\kappa_1$ across these
-  quantiles. The mean of the estimate equals 2.76. The estimate should
-  be roughly constant across the quantiles of $\hat G$. As we will see
-  in the later part, the estimated $\kappa_1$ from MLE will be 1.35
-  (roughly half of this non-parametric estimate).
+  I use this equation and estimate the average $\kappa_1$ across the
+  quantiles of $G$. Figure \ref{fig:kappa} shows the estimated
+  $\kappa_1$ across these quantiles. The mean of the estimate equals
+  2.76. The estimate should be roughly constant across the quantiles
+  of $\hat G$. As we will see in the later part, the estimated
+  $\kappa_1$ from MLE will be 1.35 (roughly half of this
+  non-parametric estimate).
 
   \begin{figure}[htbp!]
     \floatintro{The figure shows the non-parametric estimate of
@@ -217,11 +218,24 @@ is a non-parametric estimator of the density function.
     the optimum.} and calculating the square root of the diagonal
   elements. This gives the asymptotic standard errors.
 
-  The second method is to compute it using bootstrap. Bootstrap is
-  done in \texttt{R} using the \texttt{bootstrap} package. 
+  The second method is to compute it using bootstrap. I wrote the code
+  for bootstrap but it is tremendously slow. It works for small
+  samples although it does not give accurate results. I do 20
+  bootstraps on the data and estimate the standard errors from
+  there. Table \ref{tab:se} shows the estimates of standard errors
+  from the two methods. The asymptotic standard errors give a lower
+  bound on the variance of the estimates and is lower than the
+  bootstrap procedure.
+  \begin{table}[htbp!]
+    \floatintro{The table shows the estimate of standard errors
+      calculated from the Hessian matrix and bootstrap. The number of bootstraps is
+      20.}
+    \centering
+    \input{./tables/se_float.gen}
+    \caption{Estimates of standard errors}
+    \label{tab:se}
+  \end{table}
 
-  Table shows a comparison of standard errors computed using these two
-  methods. 
 \begin{figure}
   \floatintro{The figure shows a comparison of estimated $\hat F$ from
     direct estimation versus ML estimation. The solid black line shows
@@ -309,8 +323,10 @@ is a non-parametric estimator of the density function.
   towards the higher productivity firms. In particular, the vertical
   dotted lines show the 5th, 25th, 50th and 75th percentiles of log
   productivity. One can see that the wages are increasing over these
-  percentiles but tend to smoothen out beyond the 75th percentile.
-
+  percentiles but tend to smoothen out beyond the 75th
+  percentile. Figure \ref{fig:qqplot_prodG} shows the QQ-plot for
+  empirical CDF (G) versus log productivity. The function is also
+  concave and smooths out as we go beyond the 75th percentile. 
 \begin{figure}[htbp!]
   \floatintro{The figure shows the quantile-quantile plot of log wage
     versus log productivity on the BHPS data set. The vertical lines
@@ -319,6 +335,17 @@ is a non-parametric estimator of the density function.
   \includegraphics[scale=.6]{./pics/prod_wages.pdf}
   \caption{QQ plot for log wage versus log productivity}
   \label{fig:qqplot_prod}
+\end{figure}
+
+\begin{figure}[htbp!]
+  \floatintro{The figure shows the quantile-quantile plot of empirical
+    CDF ($\hat G$)
+    versus log productivity on the BHPS data set. The vertical lines
+    represent the 5th, 25th, 50th and 75th percentile of log
+    productivity.}  \centering
+  \includegraphics[scale=.6]{./pics/prod_G.pdf}
+  \caption{QQ plot for G versus log productivity}
+  \label{fig:qqplot_prodG}
 \end{figure}
 
 \item Looking at the predicted profit rate of high-productivity firms,
@@ -341,15 +368,6 @@ is a non-parametric estimator of the density function.
   \label{fig:qqplot_profit}
 \end{figure}
 \end{enumerate}
-% \newpage
-% \begin{appendix}
-% \section{Mean duration across wage percentiles}
-% \begin{table}[htbp!]
-%   \centering
-%   \input{./tables/duration_wages_float.gen}
-%   \caption{Variation in mean duration across wage percentiles}
-%   \label{tab:duration}
-% \end{table}
-% \end{appendix}
+\newpage
 \bibliography{labor}
 \end{document}
