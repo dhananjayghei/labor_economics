@@ -164,9 +164,43 @@ mle.dat <- optim(par=c(1,2,3), full_likelihood, dat=dat, method="L-BFGS-B",
 # to compute the asymptotic standard errors. This gives a lower bound on the variance.
 se.estimates <- sqrt(diag(mle.dat$hessian^(-1)))
 
+# Bootstrap standard errors
+# Set the number of bootstraps
+nboot <- 20
+est.hat <- data.frame(matrix(rep(0, nboot*3), nrow=nboot, ncol=3))
+est.var <- data.frame(matrix(rep(0, nboot*3), nrow=nboot, ncol=3))
+start.vals <- mle.dat$par
+
+for(iboot in 1:nboot){
+    # Draw random sample from the data
+    dat.sample <- dat[sample(nrow(dat), iboot, replace=TRUE), ]
+    # Start the initial optimisation
+    oout <- optim(start.vals, full_likelihood, method="L-BFGS-B", dat=dat.sample,
+                  lower=rep(.01,3), upper=rep(1,3), hessian=TRUE)
+    # Wait for convergence
+    while(oout$convergence !=0){
+        oout <- optim(oout$par, full_likelihood, method="L-BFGS-B", dat=dat.sample,
+                      lower=rep(.01,3), upper=rep(1,3), hessian=TRUE)
+    }
+    # Store the results of estimated theta and the asymptotic variances
+    est.hat[iboot, ] <- oout$par
+    # The square root of this will give you the standard erors
+    est.var[iboot, ] <- diag(solve(oout$hessian))
+}
+
+est.var <- est.var[which(est.var$X1 >0 & est.var$X2 > 0 & est.var$X3 >=0), ]
+est.sd <- apply(est.var, 2, function(x) mean(sqrt(x)))
+
+se <- data.frame(rbind(se.estimates, est.sd))
+rownames(se) <- c("Asymptotic", "Bootstrap")
+colnames(se) <- c("$\\lambda_0$", "$\\lambda_1$", "$\\delta$")
+genxtable(xtable(se, align="lrrr", digits=c(0, rep(5,3))), basename="se", include.rownames=TRUE)
+
 # Sanity checks for the model - Estimating the coefficients/ distribution function
 # Calculate the unemployment rate from the estimates
 unemp_est <- mle.dat$par[3]/(mle.dat$par[3]+mle.dat$par[1])
+# Estimate for kappa1 from MLE
+kappa1_est <- mle.dat$par[2]/mle.dat$par[3]
 
 # Estimate F from kappa_1
 pdf(file="../doc/pics/estF_data.pdf", width=5.4, height=3.8)
@@ -187,13 +221,15 @@ productivity <- function(w, kappa){
     return(data.frame(prod=p, profit=profit))
 }
 
-firm.prod <- data.frame(do.call(rbind, lapply(dat$logw1, function(x) productivity(x, kappa1_sim))))
+firm.prod <- data.frame(do.call(rbind, lapply(datPlot$logw1, function(x) productivity(x, kappa1_est))))
 colnames(firm.prod) <- c("firm_prod", "firm_profit_rate")
-dat$firm_prod <- firm.prod$firm_prod
-dat$firm_profit_rate <- firm.prod$firm_profit_rate
+datPlot$firm_prod <- firm.prod$firm_prod
+datPlot$firm_profit_rate <- firm.prod$firm_profit_rate
 
-datPlot <- dat[complete.cases(dat$logw1, dat$firm_prod), ]
+datPlot <- datPlot[complete.cases(datPlot$logw1, datPlot$firm_prod), ]
+prod_percentiles <- quantile(datPlot$firm_prod, probs=c(.05, .25, .5, .75))
 
+# Plot of log wages vs log productivity
 pdf(file="../doc/pics/prod_wages.pdf", width=5.4, height=3.8)
 par(mai=c(.8,.8,.3,.2))
 qqplot(y=datPlot$logw1, x=datPlot$firm_prod, type="l", main="", xlab="Log(productivity)", ylab="Log(wages)",
@@ -203,7 +239,18 @@ lapply(prod_percentiles, function(x){
 })
 dev.off()
 
-prod_percentiles <- quantile(datPlot$firm_prod, probs=c(.05, .25, .5, .75))
+# Plot of log productivity vs G quartiles
+pdf(file="../doc/pics/prod_G.pdf", width=5.4, height=3.8)
+par(mai=c(.8,.8,.3,.2))
+qqplot(datPlot$firm_prod, datPlot$G, main="", xlab="Log(productivity)", ylab="Empirical CDF G", type="l", lwd=2)
+lapply(prod_percentiles, function(x){
+    abline(v=x, lty=2)
+})
+dev.off()
+
+
+
+# Plot of profit rate vs log productivity
 pdf(file="../doc/pics/prod_profit.pdf", width=5.4, height=3.8)
 par(mai=c(.8,.8,.3,.2))
 qqplot(x=datPlot$firm_prod, y=datPlot$firm_profit_rate, main="", xlab="Log(productivity)",
